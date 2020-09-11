@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 import pty
 
@@ -15,13 +17,18 @@ class FakeSerial:
         #self.close()
         None
 
+    def __str__(self):
+        return self.port()
+
     def open(self):
-        self.__open_pty()
-        self.__link_pty()
+        self.__master, self.__slave = pty.openpty()
+        os.symlink(self.pty(), self.port())
 
     def close(self):
-        self.__unlink_pty()
-        self.__close_pty()
+        os.unlink(self.__port)
+        os.close(self.__master)
+        self.__master = None
+        self.__slave = None
 
     def write(self, data):
         # string needs to be converted byte object
@@ -33,28 +40,9 @@ class FakeSerial:
         # TODO
         None
 
-    def __open_pty(self):
-        self.__master, self.__slave = pty.openpty()
+    def port(self):
+        return self.__port
 
-    def __close_pty(self):
-        os.close(self.__master)
-
-    def __link_pty(self):
+    def pty(self):
         pty_name = os.ttyname(self.__slave)
-        os.symlink(pty_name, self.__port)
-
-    def __unlink_pty(self):
-        os.unlink(self.__port)
-
-
-
-import time
-
-fake_serial = FakeSerial('/tmp/ttyACM0');
-fake_serial.open()
-
-time.sleep(10)
-fake_serial.write('teste \x41 \x42')
-time.sleep(1)
-
-fake_serial.close()
+        return pty_name
