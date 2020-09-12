@@ -20,7 +20,11 @@ class TestFakeSerial(unittest.TestCase):
         ret = fake_ser.write(msg)
         self.assertEqual(len(msg), ret, 'write failed')
 
-    def test_2_close(self):
+    def test_2_read(self):
+        msg = fake_ser.read(len('test'))
+        self.assertEqual(msg, 'test', 'read failed')
+
+    def test_3_close(self):
         pty = fake_ser.pty()
         fake_ser.close()
         path_exists = os.path.exists(fake_ser.port)

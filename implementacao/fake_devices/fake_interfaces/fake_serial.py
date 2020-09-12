@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+#
+# References:
+#  Article "Creating dummy serial ports in pure python."
+#   (http://allican.be/blog/2017/01/15/python-dummy-serial-port.html)
+#  PySerial (https://github.com/pyserial/pyserial)
 
 import os
 import pty
@@ -14,6 +19,8 @@ class FakeSerial:
     """
     Fake Serial port implementation.
     """
+    CR = '\r'
+    LF = '\n'
 
     def __init__(self, port=None):
         """\
@@ -21,7 +28,6 @@ class FakeSerial:
         will be opened immediately. Otherwise a Serial port object in closed
         state is returned.
         """
-
         self.is_open = False
         self.__port = port
         self.__master = None
@@ -63,7 +69,7 @@ class FakeSerial:
 
     def close(self):
         """
-        Close port
+        Close port.
         """
         try:
             os.unlink(self.__port)
@@ -78,6 +84,7 @@ class FakeSerial:
     def write(self, data):
         """
         Output the given string over the fake serial port.
+        Returns the number of bytes written in the serial.
         """
         if not self.is_open:
             raise FakeSerialException(
@@ -86,11 +93,9 @@ class FakeSerial:
         # string needs to be converted byte object
         b = str.encode(data)
         try:
-            # returns the number of bytes written in the serial
             return os.write(self.__master, b)
         except Exception as e:
-            raise FakeSerialException(
-                'Cannot write data: ' + str(e))
+            raise FakeSerialException('Cannot write data: ' + str(e))
 
     def read(self, size=1):
         """
@@ -100,7 +105,48 @@ class FakeSerial:
         if not self.is_open:
             raise FakeSerialException(
                 'Attempting to use a port that is not open')
-        # TODO
+
+        if size < 1:
+            raise FakeSerialException('Invalid size')
+
+        # must use single byte reads as this is the only way to read
+        # without applying encodings
+        data = bytearray()
+        while size:
+            try:
+                data.append(ord(os.read(self.__master, 1)))
+            except Exception as e:
+                raise FakeSerialException('Cannot read data: ' + str(e))
+            else:
+                size -= 1
+        return bytes(data).decode()
+
+    def read_until(self, expected=LF, size=None):
+        """
+        Read until an expected sequence is found (line feed (\n) by default)
+        or the size is exceeded.
+        """
+        if not self.is_open:
+            raise FakeSerialException(
+                'Attempting to use a port that is not open')
+
+        if size < 1:
+            raise FakeSerialException('Invalid size')
+
+        expected = bytes(expected.encode())
+        lenterm = len(expected)
+        line = bytearray()
+        while True:
+            c = self.read(1)
+            if c:
+                line += c
+                if line[-lenterm:] == expected:
+                    break
+                if size is not None and len(line) >= size:
+                    break
+            else:
+                break
+        return bytes(line).decode()
 
     @property
     def port(self):
