@@ -24,19 +24,14 @@ class FakeI2c:
         self.__bus = bus
         self.__real_bus = -1
         self.__bus_link = None
-        output = self.__run_cmd_raise_exception('modprobe i2c-dev')
+        self.__real_bus_path = None
+        self.__run_cmd_raise_exception('modprobe i2c-dev')
+
     def __del__(self):
-        try:
-            os.unlink(self.__bus_link)
-            self.__run_cmd('modprobe -r i2c-stub')
-        except:
-            # ignore errors
-            pass
+        self.del_fake_devices()
 
     def __str__(self):
-        if self.__bus_link:
-            return self.__bus_link
-        return ''
+        return self.bus_path()
 
     def bus(self):
         """
@@ -44,11 +39,21 @@ class FakeI2c:
         """
         return self.__bus
 
+    def bus_path(self):
+        if self.__bus_link:
+            return self.__bus_link
+        return ''
+
     def real_bus(self):
         """
         Get the number of the real i2c bus.
         """
         return self.__real_bus
+
+    def real_bus_path(self):
+        if self.__real_bus_path:
+            return self.__real_bus_path
+        return ''
 
     def add_fake_devices(self, devices_list):
         """
@@ -58,6 +63,17 @@ class FakeI2c:
         cmd = 'modprobe i2c-stub chip_addr=' + list_addr
         output = self.__run_cmd_raise_exception(cmd)
         self.__symlink_i2c_stub()
+
+    def del_fake_devices(self):
+        """
+        Unload i2c-stub.
+        """
+        try:
+            os.unlink(self.__bus_link)
+            self.__run_cmd('modprobe -r i2c-stub')
+        except:
+            # ignore errors
+            pass
 
     def __run_cmd(self, cmd):
         """
@@ -98,7 +114,9 @@ class FakeI2c:
                     os.path.exists(os.readlink(self.__bus_link))):
                 os.unlink(self.__bus_link)
 
+            self.__real_bus_path = '/dev/' + i2c_bus
+
             if not os.path.islink(self.__bus_link):
-                os.symlink('/dev/' + i2c_bus, self.__bus_link)
+                os.symlink(self.__real_bus_path, self.__bus_link)
         except Exception as e:
             raise FakeI2cException('Cannot create fake i2c symlink: ' + repr(e))

@@ -33,3 +33,4 @@ function unittest {
 }
 
 unittest FakeSerial tests.fake_devices.fake_interfaces.fake_serial
+unittest FakeI2c tests.fake_devices.fake_interfaces.fake_i2c
