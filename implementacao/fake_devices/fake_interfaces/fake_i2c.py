@@ -134,6 +134,7 @@ class FakeI2cBus(smbus2.SMBus):
             if 'SMBus stub driver' in line:
                 i2c_bus = line.split()[0]
                 self.__real_bus = int(i2c_bus.strip('i2c-'))
+                break
 
         if i2c_bus is None:
             raise FakeI2cException('SMBus stub driver not found')
