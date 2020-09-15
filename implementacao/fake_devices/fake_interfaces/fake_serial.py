@@ -21,9 +21,10 @@ class FakeSerial:
     """
     CR = '\r'
     LF = '\n'
+    CRLF = CR + LF
 
     def __init__(self, port=None):
-        """\
+        """
         Initialize fake serial port object. If a "port" is given, then the port
         will be opened immediately. Otherwise a Serial port object in closed
         state is returned.
@@ -95,7 +96,7 @@ class FakeSerial:
         try:
             return os.write(self.__master, b)
         except Exception as e:
-            raise FakeSerialException('Cannot write data: ' + str(e))
+            raise FakeSerialException('Cannot write data: ' + repr(e))
 
     def read(self, size=1):
         """
@@ -116,7 +117,7 @@ class FakeSerial:
             try:
                 data.append(ord(os.read(self.__master, 1)))
             except Exception as e:
-                raise FakeSerialException('Cannot read data: ' + str(e))
+                raise FakeSerialException('Cannot read data: ' + repr(e))
             else:
                 size -= 1
         return bytes(data).decode()
