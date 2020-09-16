@@ -22,7 +22,6 @@ class FakeGpsSensor(threading.Thread):
         self.__stop_event = threading.Event()
         self.__fake_serial = fake_serial.FakeSerial()
         self.__fake_serial.port = port
-        self.__port = port
         self.start()
 
     def __del__(self):
