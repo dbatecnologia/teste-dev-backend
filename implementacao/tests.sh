@@ -2,7 +2,6 @@
 
 RED='\e[31m'
 GREEN='\e[32m'
-YELLOW='\e[33m'
 NC='\e[0m' # No Color
 
 function echo_red {
@@ -11,10 +10,6 @@ function echo_red {
 
 function echo_green {
     echo -e "$GREEN$@$NC"
-}
-
-function echo_yellow {
-    echo -e "$YELLOW$@$NC"
 }
 
 function unittest {
@@ -36,3 +31,4 @@ unittest FakeSerial tests.fake_devices.fake_interfaces.fake_serial
 unittest FakeI2c tests.fake_devices.fake_interfaces.fake_i2c
 unittest FakeI2cSensor tests.fake_devices.fake_i2c_sensor
 unittest FakeGpsSensor tests.fake_devices.fake_gps_sensor
+unittest FakeGprs tests.fake_devices.fake_gprs

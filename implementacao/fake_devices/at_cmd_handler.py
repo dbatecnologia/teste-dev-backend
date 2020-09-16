@@ -62,7 +62,7 @@ class AtCopsHandler(ATCommandHandler):
 
     def handleReadCommand(self):
         """
-        Get mode.
+        Get COPS mode.
         """
         res = '+COPS: ' + str(self.mode)
         return ATCommandResult(ATCommandResult.OK, res)
@@ -129,7 +129,7 @@ class AtCgdcontHandler(ATCommandHandler):
 
     def handleReadCommand(self):
         """
-        Get mode.
+        Get CGDCONT settings.
         """
         res = '+CGDCONT: ' + str(self.cid) + ', "' + self.PDP_type + '",' \
                 + '"' + self.APN + '",' + '"' +self.PDP_addr + '",' + \

@@ -37,18 +37,25 @@ class FakeGprs(threading.Thread):
         self.__fake_serial.open()
         cmd = ''
         while not self.__stop_event.is_set():
-            char = self.__fake_serial.read_nonblock()
+            char = self.__fake_serial.read_nonblock(1)
             if char == '':
                 time.sleep(0.2)
                 continue
             cmd += char
 
             if self.__ate.value == 1:
-                # Echo
+                # Echo is enabled
                 self.__fake_serial.write(char)
 
             if (char != fake_serial.FakeSerial.CR and
                     char != fake_serial.FakeSerial.LF):
+                continue
+
+            while len(cmd) > 0 and (cmd[0] == fake_serial.FakeSerial.CR or
+                    cmd[0] == fake_serial.FakeSerial.LF):
+                cmd = cmd[1:]
+
+            if len(cmd) == 0:
                 continue
 
             # Work around. The atcmd module has a bug with double quotes.

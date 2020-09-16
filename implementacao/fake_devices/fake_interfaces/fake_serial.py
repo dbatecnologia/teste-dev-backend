@@ -152,7 +152,7 @@ class FakeSerial:
                 break
         return bytes(line).decode()
 
-    def read_nonblock(self):
+    def read_nonblock(self, size=1):
         """
         Try read a byte in non-blocking mode.
         """
@@ -164,7 +164,7 @@ class FakeSerial:
         fcntl.fcntl(self.__master, fcntl.F_SETFL, flag | os.O_NONBLOCK)
         data = ''.encode()
         try:
-            data = os.read(self.__master, 1)
+            data = os.read(self.__master, size)
         except io.BlockingIOError:
             # Ignore BlockingIOError
             pass
