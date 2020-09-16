@@ -6,7 +6,10 @@
 #  PySerial (https://github.com/pyserial/pyserial)
 
 import os
+import io
 import pty
+import time
+import fcntl
 
 class FakeSerialException(Exception):
     """
@@ -148,6 +151,27 @@ class FakeSerial:
             else:
                 break
         return bytes(line).decode()
+
+    def read_nonblock(self):
+        """
+        Try read a byte in non-blocking mode.
+        """
+        if not self.is_open:
+            raise FakeSerialException(
+                'Attempting to use a port that is not open')
+
+        flag = fcntl.fcntl(self.__master, fcntl.F_GETFL)
+        fcntl.fcntl(self.__master, fcntl.F_SETFL, flag | os.O_NONBLOCK)
+        data = ''.encode()
+        try:
+            data = os.read(self.__master, 1)
+        except io.BlockingIOError:
+            # Ignore BlockingIOError
+            pass
+        except Exception as e:
+            raise FakeSerialException('Cannot read data: ' + repr(e))
+        fcntl.fcntl(self.__master, fcntl.F_SETFL, flag)
+        return bytes(data).decode()
 
     @property
     def port(self):

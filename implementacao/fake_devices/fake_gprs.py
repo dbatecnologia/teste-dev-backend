@@ -37,7 +37,10 @@ class FakeGprs(threading.Thread):
         self.__fake_serial.open()
         cmd = ''
         while not self.__stop_event.is_set():
-            char = self.__fake_serial.read(1)
+            char = self.__fake_serial.read_nonblock()
+            if char == '':
+                time.sleep(0.2)
+                continue
             cmd += char
 
             if self.__ate.value == 1:
