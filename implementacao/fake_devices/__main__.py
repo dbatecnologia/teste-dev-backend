@@ -3,6 +3,7 @@
 import time
 import fake_i2c_sensor
 import fake_gps_sensor
+import fake_gprs
 from fake_interfaces import fake_i2c
 
 # 0 to 100
@@ -28,6 +29,8 @@ def main():
 
     gps = fake_gps_sensor.FakeGpsSensor('/dev/ttyACM100')
 
+    gprs = fake_gprs.FakeGprs('/dev/ttyACM200')
+
     try:
         while True:
             time.sleep(1)
@@ -38,11 +41,13 @@ def main():
         distance_sensor.stop()
         battery_sensor.stop()
         gps.stop()
+        gprs.stop()
 
         light_sensor.join()
         distance_sensor.join()
         battery_sensor.join()
         gps.join()
+        gprs.join()
 
         i2c_bus.close()
 
