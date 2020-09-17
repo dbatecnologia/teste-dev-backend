@@ -74,9 +74,9 @@ class AtCgdcontHandler(ATCommandHandler):
     """
     def __init__(self):
         self.cid = 0
-        self.PDP_type = 'IP'
-        self.APN = ''
-        self.PDP_addr = ''
+        self.pdp_type = 'IP'
+        self.apn = ''
+        self.pdp_addr = ''
         self.d_cmp = 0
         self.h_cmp = 0
 
@@ -131,19 +131,19 @@ class AtCgdcontHandler(ATCommandHandler):
         """
         Get CGDCONT settings.
         """
-        res = '+CGDCONT: ' + str(self.cid) + ', "' + self.PDP_type + '",' \
-                + '"' + self.APN + '",' + '"' +self.PDP_addr + '",' + \
+        res = '+CGDCONT: ' + str(self.cid) + ', "' + self.pdp_type + '",' \
+                + '"' + self.apn + '",' + '"' +self.pdp_addr + '",' + \
                 str(self.d_cmp) + ',' + str(self.h_cmp)
         return ATCommandResult(ATCommandResult.OK, res)
 
-    def __check_set_params(self, cid, PDP_type, APN, PDP_addr, d_cmp, h_cmp):
+    def __check_set_params(self, cid, pdp_type, apn, pdp_addr, d_cmp, h_cmp):
         if cid < 0 or cid > 3:
             raise
-        if PDP_type != 'IP' and PDP_type != 'PPP':
+        if pdp_type != 'IP' and pdp_type != 'PPP':
             raise
-        if type(APN) is not str:
+        if type(apn) is not str:
             raise
-        if type(PDP_addr) is not str:
+        if type(pdp_addr) is not str:
             raise
         if d_cmp < 0 or d_cmp > 2:
             raise
@@ -151,8 +151,32 @@ class AtCgdcontHandler(ATCommandHandler):
             raise
 
         self.cid       = cid
-        self.PDP_type  = PDP_type
-        self.APN       = APN.lower()
-        self.PDP_addr  = PDP_addr.lower()
+        self.pdp_type  = pdp_type
+        self.apn       = apn.lower()
+        self.pdp_addr  = pdp_addr.lower()
         self.d_cmp     = d_cmp
         self.h_cmp     = h_cmp
+
+
+class AtCgregHandler(ATCommandHandler):
+    """
+    Check GPRS network registration status.
+    """
+    def __init__(self):
+        self.conn = 0
+
+    def handleTestCommand(self):
+        """
+        Return the GPRS connection parameters.
+        0: disconnected
+        1: connected
+        """
+        res = '+CGREG: (0-1)'
+        return ATCommandResult(ATCommandResult.OK, res)
+
+    def handleReadCommand(self):
+        """
+        Get CGDCONT settings.
+        """
+        res = '+CGREG: ' + str(self.conn)
+        return ATCommandResult(ATCommandResult.OK, res)

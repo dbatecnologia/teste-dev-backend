@@ -69,6 +69,13 @@ class FakeGprs(threading.Thread):
             self.__fake_serial.write(fake_serial.FakeSerial.CRLF + \
                     result_str + fake_serial.FakeSerial.CRLF)
             cmd = ''
+
+            # Set status of network connection.
+            if len(self.__atcgdcont.apn) != 0 and self.__atcops.mode != 2:
+                self.__atcgreg.conn = 1
+            else:
+                self.__atcgreg.conn = 0
+
         self.__fake_serial.close()
 
     def __register_at_cmds(self):
@@ -85,3 +92,7 @@ class FakeGprs(threading.Thread):
         # AT+CGDCONT
         self.__atcgdcont = at_cmd_handler.AtCgdcontHandler()
         self.__parser.register('+CGDCONT', self.__atcgdcont);
+
+        # AT+CGREG
+        self.__atcgreg = at_cmd_handler.AtCgregHandler()
+        self.__parser.register('+CGREG', self.__atcgreg);
