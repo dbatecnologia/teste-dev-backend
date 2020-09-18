@@ -27,15 +27,25 @@ CONFIG_DEFAULT = {
         }
     }
 
+
 def read_file(config_file):
     global config
     try:
         with open(config_file, 'r') as f:
             config = json.load(f)
-        return check_integrity(config)
-    except:
-        config = CONFIG_DEFAULT
-        return False
+        if check_integrity(config):
+            return True
+        print('Checks config integrity fails. Using default config')
+    except Exception as e:
+        print('Read config file fails. Using default config: ' + repr(e))
+    config = CONFIG_DEFAULT
+    return False
+
+
+def write_file(config_file):
+    with open(config_file, 'w') as f:
+        json.dump(config, f, indent=4)
+
 
 def check_integrity(config):
     """

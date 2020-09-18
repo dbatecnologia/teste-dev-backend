@@ -7,6 +7,10 @@ import getopt
 import signal
 import datetime
 import threading
+
+import warnings
+# Don't show twisted warn
+warnings.simplefilter("ignore")
 from twisted.internet import reactor, protocol
 from twisted.protocols import policies
 
@@ -28,6 +32,19 @@ class TcpServer(protocol.Protocol, policies.TimeoutMixin):
             data_send = 'i:' + json.dumps(devs_read) + '\n'
             self.transport.write(data_send.encode())
 
+        # ULR server
+        if 's' in data_dec:
+            data_send = 's:' + config.config["server"]["url"] + '\n'
+            self.transport.write(data_send.encode())
+
+        # Change URL server
+        if 'n:' in data_dec:
+            start = data_dec.find('n:')
+            end = data_dec.find('\n')
+            if end > start + 2:
+                url = data_dec[start + 2:end]
+                print('url: ', url)
+
         # Local date
         if 'd' in data_dec:
             data_send = 'd:' + str(datetime.date.today()) + '\n'
@@ -37,11 +54,6 @@ class TcpServer(protocol.Protocol, policies.TimeoutMixin):
         if 't' in data_dec:
             now = datetime.datetime.now()
             data_send = 't:' + now.strftime('%H:%M:%S') + '\n'
-            self.transport.write(data_send.encode())
-
-        # ULR server
-        if 's' in data_dec:
-            data_send = 's:' + config.config["server"]["url"] + '\n'
             self.transport.write(data_send.encode())
 
         self.transport.loseConnection()
@@ -60,17 +72,17 @@ def run(config):
         time.sleep(1)
 
 
-def main(argv):
+def main(prog_name, argv):
     config_file = 'config.json'
     try:
         opts, _ = getopt.getopt(argv, 'hc:', ['config_file='])
     except getopt.GetoptError:
-        print('test.py -c <config_file>')
+        print(prog_name + ' -c <config_file>')
         sys.exit(2)
 
     for opt, arg in opts:
         if opt == '-h':
-            print('test.py -c <config_file>')
+            print(prog_name + ' -c <config_file>')
             sys.exit()
         elif opt in ('-c', '--config_file'):
             config_file = arg
@@ -80,6 +92,7 @@ def main(argv):
 
     thread = threading.Thread(target=run, args=(config.config,))
     thread.start()
+
     signal.signal(signal.SIGINT, lambda *a: reactor.stop())
 
     factory = protocol.ServerFactory()
@@ -93,4 +106,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main(sys.argv[0], sys.argv[1:])
