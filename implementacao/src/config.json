@@ -1,0 +1,22 @@
+{
+    "tcp_port": 1234,
+    "server": {
+        "url": "127.0.0.1:8080",
+        "send_interval": 30
+    },
+    "i2c_sensors": {
+        "bus": 100,
+        "light_sensor_addr": 16,
+        "distance_sensor_addr": 38,
+        "battery_sensor_addr": 97
+    },
+    "gps": {
+        "port": "/dev/ttyACM100",
+        "rate": 9600
+    },
+    "gprs": {
+        "port": "/dev/ttyACM200",
+        "rate": 9600,
+        "apn": "tim.com.br"
+    }
+}
