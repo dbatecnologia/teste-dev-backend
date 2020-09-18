@@ -1,9 +1,14 @@
+#!/usr/bin/env python3
+
+import time
 import devices
 
 def main():
     devs = devices.Devices()
     try:
-        devs.run()
+        while True:
+            print(devs.read())
+            time.sleep(1)
     except KeyboardInterrupt:
         print('stopping...')
 

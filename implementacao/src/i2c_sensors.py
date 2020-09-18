@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import smbus2
 
 class I2cSensor(object):
@@ -27,7 +29,7 @@ class LightSensor(I2cSensor):
             data = super().read()
             return data if data < 100 else 100
         except:
-            return None
+            return -1
 
 
 class DistanceSensor(I2cSensor):
@@ -38,7 +40,7 @@ class DistanceSensor(I2cSensor):
         try:
             return super().read()/100
         except:
-            return None
+            return -1
 
 
 class BatterySensor(I2cSensor):
@@ -49,4 +51,4 @@ class BatterySensor(I2cSensor):
         try:
             return super().read()/10
         except:
-            return None
+            return -1

@@ -6,6 +6,7 @@
 import serial
 
 class Gps:
+    invalid_value = -1, '', -1, ''
     def __init__(self, port='/dev/ttyACM100', bps=9600):
         self.__serial = serial.Serial()
         self.__serial.port = port
@@ -16,12 +17,15 @@ class Gps:
         try:
             self.__serial.open()
         except:
-            return None
+            return self.invalid_value
         data = self.__read()
         self.__serial.close()
         if data is None:
-            return None
-        coord = self.__parse(data)
+            return self.invalid_value
+        try:
+            coord = self.__parse(data)
+        except:
+            return self.invalid_value
         return coord
 
     def __read(self):
