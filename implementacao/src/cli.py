@@ -39,18 +39,21 @@ class TcpClient(protocol.Protocol, protocol.ClientFactory):
 
 
 def print_help(prog_name):
-    print('Usage: ' + prog_name + ' <opt>')
+    print('Usage: ' + prog_name + ' <opt [arg]>')
     print('opt:')
     print('\t-h: show this help')
-    print('\t-i: read devices informations')
+    print('\t-i: show devices informations')
     print('\t-s: show url server')
     print('\t-t: show current time')
     print('\t-d: show current date')
-
+    print('\t-u [server]: change server')
+    print('\t-n [time hh:mm:ss]: change current time')
+    print('\t-m [date aaaa-mm-dd]: change current date')
 
 def main(prog_name, argv):
     try:
-        opts, _ = getopt.getopt(argv, 'histda:', ['config_file='])
+        opts, _ = getopt.getopt(argv, 'histdu:n:m:',
+                ['server=', 'time=', 'date='])
     except getopt.GetoptError:
         print_help(prog_name)
         sys.exit(2)
@@ -65,13 +68,19 @@ def main(prog_name, argv):
             print_help(prog_name)
             sys.exit()
         elif opt == '-i':
-            opts_tcp += 'i'
+            opts_tcp += 'i?\n'
         elif opt == '-s':
-            opts_tcp += 's'
+            opts_tcp += 's?\n'
         elif opt == '-t':
-            opts_tcp += 't'
+            opts_tcp += 't?\n'
         elif opt == '-d':
-            opts_tcp += 'd'
+            opts_tcp += 'd?\n'
+        elif opt in ('-u', '--server'):
+            opts_tcp += 'u:' + arg + '\n'
+        elif opt in ('-n', '--time'):
+            opts_tcp += 'n:' + arg + '\n'
+        elif opt in ('-m', '--date'):
+            opts_tcp += 'm:' + arg + '\n'
 
     f = TcpClient()
     f.protocol = TcpClient

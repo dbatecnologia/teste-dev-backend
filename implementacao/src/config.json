@@ -1,22 +1,22 @@
 {
-    "tcp_port": 1234,
+    "gps": {
+        "rate": 9600,
+        "port": "/dev/ttyACM100"
+    },
     "server": {
-        "url": "http://127.0.0.1:8080",
+        "url": "http:127.0.0.1:8001/api",
         "send_interval": 30
     },
     "i2c_sensors": {
-        "bus": 100,
-        "light_sensor_addr": 16,
+        "battery_sensor_addr": 97,
         "distance_sensor_addr": 38,
-        "battery_sensor_addr": 97
-    },
-    "gps": {
-        "port": "/dev/ttyACM100",
-        "rate": 9600
+        "light_sensor_addr": 16,
+        "bus": 100
     },
     "gprs": {
-        "port": "/dev/ttyACM200",
         "rate": 9600,
+        "port": "/dev/ttyACM200",
         "apn": "tim.com.br"
-    }
+    },
+    "tcp_port": 1234
 }
