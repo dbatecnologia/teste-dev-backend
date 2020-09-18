@@ -28,31 +28,29 @@ class TcpServer(protocol.Protocol, policies.TimeoutMixin):
     def dataReceived(self, data):
         data_dec = data.decode()
 
+        data_send = ''
+
         # Devices infos
         if 'i?\n' in data_dec:
             data_dec = data_dec.replace('i?\n', '')
             devs_read = devices.devices.read()
-            data_send = 'i:' + json.dumps(devs_read) + '\n'
-            self.transport.write(data_send.encode())
+            data_send += 'i:' + json.dumps(devs_read) + '\n'
 
         # ULR server
         if 's?\n' in data_dec:
             data_dec = data_dec.replace('s?\n', '')
-            data_send = 's:' + config.config["server"]["url"] + '\n'
-            self.transport.write(data_send.encode())
+            data_send += 's:' + config.config["server"]["url"] + '\n'
 
         # Local date
         if 'd?\n' in data_dec:
             data_dec = data_dec.replace('d?\n', '')
-            data_send = 'd:' + str(datetime.date.today()) + '\n'
-            self.transport.write(data_send.encode())
+            data_send += 'd:' + str(datetime.date.today()) + '\n'
 
         # Local time
         if 't?\n' in data_dec:
             data_dec = data_dec.replace('t?\n', '')
             now = datetime.datetime.now()
-            data_send = 't:' + now.strftime('%H:%M:%S') + '\n'
-            self.transport.write(data_send.encode())
+            data_send += 't:' + now.strftime('%H:%M:%S') + '\n'
 
         # Change URL server
         if 'u:' in data_dec:
@@ -75,6 +73,9 @@ class TcpServer(protocol.Protocol, policies.TimeoutMixin):
             time, start, end = self.parse('n:', data_dec)
             data_dec = data_dec[:start] + data_dec[end+1:]
             os.system('date +%T -s "' + time + '"')
+
+        if len(data_send) > 0:
+            self.transport.write(data_send.encode())
 
         self.transport.loseConnection()
 

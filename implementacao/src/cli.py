@@ -85,7 +85,7 @@ def main(prog_name, argv):
     f = TcpClient()
     f.protocol = TcpClient
     f.protocol.opts = opts_tcp
-    reactor.connectTCP("localhost", 1234, f)
+    reactor.connectTCP('localhost', 1234, f)
     reactor.run()
 
 if __name__ == '__main__':

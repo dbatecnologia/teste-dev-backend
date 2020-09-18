@@ -1,0 +1,65 @@
+<html>
+    <head>
+        <title>Devices</title>
+        <style>
+            table {
+                font-family: arial, sans-serif;
+                border-collapse: collapse;
+                width: 60%;
+            }
+
+            td, th {
+                border: 1px solid #dddddd;
+                text-align: left;
+                padding: 8px;
+                text-align: center;
+            }
+
+            tr:nth-child(even) {
+                background-color: #eeeeee;
+            }
+        </style>
+    </head>
+    <body>
+        <center>
+            <div>
+                <br>
+                <a style="font-weight:bold" href="/devices">Devices</a>
+                &nbsp;
+                <a href="/settings">Settings</a>
+                &nbsp;
+                <a href="/logout">Logout</a>
+                <br><br><br>
+            </div>
+            <table>
+                <tr>
+                    <td>Distance</td>
+                    <td>{{ distance }}cm</td>
+                </tr>
+                <tr>
+                    <td>Luminosity</td>
+                    <td>{{ luminosity }}%</td>
+                </tr>
+                <tr>
+                    <td>Battery</td>
+                    <td>{{ battery }}V</td>
+                </tr>
+                <tr>
+                    <td>Lighting</td>
+                    <td>{{ lighting }}</td>
+                </tr>
+                <tr>
+                    <td>GPS</td>
+                    <td>
+                        {{ gps_lat }} {{ gps_lat_dir }};
+                        {{ gps_lon }} {{ gps_lon_dir}}
+                    </td>
+                </tr>
+                <tr>
+                    <td>GPRS connection</td>
+                    <td>{{ gprs }}</td>
+                </tr>
+            </table>
+        </center>
+    </body>
+</html>

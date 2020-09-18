@@ -1,0 +1,76 @@
+<html>
+    <head>
+        <title>Settings</title>
+        <style>
+            table {
+                font-family: arial, sans-serif;
+                border-collapse: collapse;
+                width: 50%;
+                text-align: center;
+            }
+
+            td, th {
+                border: 1px solid #dddddd;
+                text-align: left;
+                padding: 8px;
+                text-align: center;
+            }
+
+            tr:nth-child(even) {
+                background-color: #eeeeee;
+            }
+        </style>
+    </head>
+    <body>
+        <center>
+            <div>
+                <br>
+                <a href="/devices">Devices</a>
+                &nbsp;
+                <a style="font-weight:bold" href="/settings">Settings</a>
+                &nbsp;
+                <a href="/logout">Logout</a>
+                <br><br><br>
+            </div>
+
+            <form action="/settings" method="POST">
+                <table>
+                    <tr>
+                        <td>
+                            Server URL
+                        </td>
+                        <td colspan="2">
+                            <input type="text" name="server" style="width:70%;" value={{ server }}>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Date
+                        </td>
+                        <td>
+                            <input type="date" name="date" style="width:70%;" value={{ date }}>
+                        </td>
+                        <td>
+                            Change date
+                            <input type="checkbox" name="change_date">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Time
+                        </td>
+                        <td>
+                            <input type="time" name="time" step="1" style="width:70%;" value={{ time }}>
+                        </td>
+                        <td>
+                            Change time
+                            <input type="checkbox" name="change_time">
+                        </td>
+                    </tr>
+                </table>
+                <p><input type="submit" value="Save"/></p>
+                {% module xsrf_form_html() %}
+            </form>
+        </center>
+    </body>
+</html>
