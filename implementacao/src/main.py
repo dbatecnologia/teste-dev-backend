@@ -4,10 +4,29 @@ import sys
 import time
 import json
 import getopt
+import signal
+import threading
+from twisted.internet import reactor, protocol
 
 import devices
 
+devs = None
+stop = False
+
+class TcpServer(protocol.Protocol):
+    def connectionMade(self):
+        print('new connection')
+        devs_read = devs.read()
+        self.transport.write(json.dumps(devs_read).encode())
+        self.transport.loseConnection()
+
+    def dataReceived(self, data):
+        self.transport.write(data)
+
+
 def run(config):
+    global devs
+
     if config is None:
         interval = 30
         devs = devices.Devices()
@@ -25,16 +44,14 @@ def run(config):
                 config['gprs']['port'],
                 config['gprs']['rate'],
                 config['gprs']['apn'])
-
-    stop = False
-    try:
-        while not stop:
+    now = time.time()
+    old = now - interval
+    while not stop:
+        now = time.time()
+        if now - old >= interval:
             print(devs.read())
-            time.sleep(interval)
-    except KeyboardInterrupt:
-        stop = True
-        print('stopping...')
-
+            old = now
+        time.sleep(1)
 
 def check_config_integrity(config):
     """
@@ -83,6 +100,7 @@ def check_config_integrity(config):
 
     return True
 
+
 def main(argv):
     config_file = 'config.json'
     try:
@@ -99,15 +117,28 @@ def main(argv):
             config_file = arg
 
     config = None
+    tcp_port = 1234
     try:
         with open(config_file, 'r') as f:
             config = json.load(f)
         if not check_config_integrity(config):
             print('Error in config file. Using default params.')
+        tcp_port = config['tcp_port']
     except:
         print('Error in read config file. Using default params.')
 
-    run(config)
+    thread = threading.Thread(target=run, args=(config,))
+    thread.start()
+    signal.signal(signal.SIGINT, lambda *a: reactor.stop())
+
+    factory = protocol.ServerFactory()
+    factory.protocol = TcpServer
+    reactor.listenTCP(tcp_port, factory)
+    reactor.run()
+    print('stopping...')
+    global stop
+    stop = True
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
