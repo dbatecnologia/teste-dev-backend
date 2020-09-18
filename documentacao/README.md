@@ -2,19 +2,21 @@
 
 Instalar os seguintes pacotes/módulos:
 ```text
-apt get install i2c-tools
-apt get install pip3
+apt install python3-pip
+apt install python3-setuptools
+apt install git
+apt install i2c-tools
 pip3 install pyserial
 pip3 install smbus2
-pip3 install -e git+https://github.com/collab-project/atcmd.git#egg=atcmd
 pip3 install twisted
 pip3 install tornado
+pip3 install -e git+https://github.com/collab-project/atcmd.git#egg=atcmd
 ```
 
 # Execução
 
-Para executar o projeto antes de tudo é necessário estar logado com o usuário _root_ (``sudo su``).
-Segundo passo, execute o módulo de simulação dos dispositivos:
+Para executar o projeto é necessário estar logado com o usuário _root_ (``sudo su``).
+Depois execute o módulo de simulação dos dispositivos:
 ```text
 cd implementacao/fake_devices/
 python3 main.py
@@ -24,18 +26,24 @@ O módulo ``fake_devices`` irá criar as seguintes interfaces:
 * ``/dev/ttyACM100``: Porta serial do falso GPS.
 * ``/dev/ttyACM200``: Porta serial do falso GPRS.
 
-Essas interfaces são _links_ simbólicos para as interfaces de simulação dos dispositivos. Normalmente a numeração das portas mudam e para não ficar mudando o arquivo de configuração (o arquivo será detalhado mais adiante) para cada vez que as portas mudam, são criados os _links_ simbólicos que sempre terão a mesma numeração.
+Essas interfaces são _links_ simbólicos para as interfaces de simulação dos dispositivos. Normalmente as portas mudam e para não ficar mudando o arquivo de configuração (o arquivo será detalhado mais adiante) para toda vez que as portas mudarem, são criados os _links_ simbólicos, que sempre estarão com a mesma numeração.
 
-No barramento I2C (``/dev/i2c-100``) estão configurados três endereços: 0x10, 0x26 e 0x61 que seriam a simulação dos sensores de luminosidade, distância e de bateria, respectivamente. Como não foi especificado nenhum modelo de sensor, na simulação apenas são realizadas leituras dos dados. Não foi simulado alguma configuração desses sensores. Ao ler o endereço do sensor fictício de luminosidade será retornado um valor entre 0 à 100, 0 escuro e 100 claro. O sensor de distância retorna um valor entre 0 à 255 simulando valores entre 0 à 2.55 metros. E o sensor de bateria retorna um valor entre 90 à 120, ou seja, de 9V à 12V.
+No barramento I2C (``/dev/i2c-100``) estão configurados três endereços: 0x10, 0x26 e 0x61, que seriam os endereços para a simulação dos sensores de luminosidade, distância e de bateria, respectivamente. Como não foi especificado nenhum modelo de sensor, na simulação apenas são realizadas leituras de dados. Não foi simulado nenhuma configuração desses sensores. Ao ler o endereço do sensor fictício de luminosidade será retornado um valor entre 0 à 100, 0 escuro e 100 claro. O sensor de distância retorna um valor entre 0 à 255 simulando valores entre 0 à 2.55 metros. E o sensor de bateria retorna um valor entre 90 à 120, ou seja, de 9V à 12V.
 
 NOTA: Não é necessário carregar manualmente os módulos I2C para configurar os falsos sensores. Isso já é realizado pelo módulo.
 
 Com a simulação dos dispositivos em execução é possível iniciar a aplicação. Em um outro terminal, com o usuário _root_, entre no seguinte diretório e execute:
 ```text
 cd implementacao/src/
-python3 main.py -c config.json 
+python3 main.py -c config.json
 ```
 Nesse comando o módulo está carregando as configurações apartir do arquivos ``config.json``.
+
+No mesmo diretório há um simples servidor de teste que recebe as requisições via REST:
+```text
+cd implementacao/src/
+python3 server_rest_test.py
+```
 
 # Configuração
 
