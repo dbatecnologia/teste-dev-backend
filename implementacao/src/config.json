@@ -1,7 +1,7 @@
 {
     "tcp_port": 1234,
     "server": {
-        "url": "127.0.0.1:8080",
+        "url": "http://127.0.0.1:8080",
         "send_interval": 30
     },
     "i2c_sensors": {

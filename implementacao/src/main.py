@@ -5,23 +5,47 @@ import time
 import json
 import getopt
 import signal
+import datetime
 import threading
 from twisted.internet import reactor, protocol
+from twisted.protocols import policies
 
 import devices
 
 devs = None
 stop = False
+config = None
 
-class TcpServer(protocol.Protocol):
+class TcpServer(protocol.Protocol, policies.TimeoutMixin):
     def connectionMade(self):
-        print('new connection')
-        devs_read = devs.read()
-        self.transport.write(json.dumps(devs_read).encode())
-        self.transport.loseConnection()
+        self.setTimeout(5)
 
     def dataReceived(self, data):
-        self.transport.write(data)
+        data_dec = data.decode()
+
+        # Devices infos
+        if 'i' in data_dec:
+            devs_read = devs.read()
+            data_send = 'i:' + json.dumps(devs_read) + '\n'
+            self.transport.write(data_send.encode())
+
+        # Local date
+        if 'd' in data_dec:
+            data_send = 'd:' + str(datetime.date.today()) + '\n'
+            self.transport.write(data_send.encode())
+
+        # Local time
+        if 't' in data_dec:
+            now = datetime.datetime.now()
+            data_send = 't:' + now.strftime('%H:%M:%S') + '\n'
+            self.transport.write(data_send.encode())
+
+        # ULR server
+        if 's' in data_dec:
+            data_send = 's:' + config["server"]["url"] + '\n'
+            self.transport.write(data_send.encode())
+
+        self.transport.loseConnection()
 
 
 def run(config):
@@ -52,6 +76,7 @@ def run(config):
             print(devs.read())
             old = now
         time.sleep(1)
+
 
 def check_config_integrity(config):
     """
@@ -116,7 +141,7 @@ def main(argv):
         elif opt in ('-c', '--config_file'):
             config_file = arg
 
-    config = None
+    global config
     tcp_port = 1234
     try:
         with open(config_file, 'r') as f:
@@ -138,6 +163,7 @@ def main(argv):
     print('stopping...')
     global stop
     stop = True
+    thread.join()
 
 
 if __name__ == "__main__":
