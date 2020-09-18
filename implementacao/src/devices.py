@@ -4,6 +4,29 @@ import gps
 import gprs
 import i2c_sensors
 
+devices = None
+
+def init(config):
+    global devices
+    if devices != None:
+        return False
+    if type(config) != dict:
+        return False
+    devices = Devices(
+            config['i2c_sensors']['bus'],
+            [
+                config['i2c_sensors']['light_sensor_addr'],
+                config['i2c_sensors']['distance_sensor_addr'],
+                config['i2c_sensors']['battery_sensor_addr']
+            ],
+            config['gps']['port'],
+            config['gps']['rate'],
+            config['gprs']['port'],
+            config['gprs']['rate'],
+            config['gprs']['apn'])
+    return True
+
+
 class Devices:
     def __init__(self, i2c_bus=100, i2c_sensors_addr=[0x10,0x26,0x61],
             gps_port='/dev/ttyACM100', gps_rate=9600,

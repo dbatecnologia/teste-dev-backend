@@ -11,10 +11,9 @@ from twisted.internet import reactor, protocol
 from twisted.protocols import policies
 
 import devices
+import config
 
-devs = None
 stop = False
-config = None
 
 class TcpServer(protocol.Protocol, policies.TimeoutMixin):
     def connectionMade(self):
@@ -25,7 +24,7 @@ class TcpServer(protocol.Protocol, policies.TimeoutMixin):
 
         # Devices infos
         if 'i' in data_dec:
-            devs_read = devs.read()
+            devs_read = devices.devices.read()
             data_send = 'i:' + json.dumps(devs_read) + '\n'
             self.transport.write(data_send.encode())
 
@@ -42,88 +41,23 @@ class TcpServer(protocol.Protocol, policies.TimeoutMixin):
 
         # ULR server
         if 's' in data_dec:
-            data_send = 's:' + config["server"]["url"] + '\n'
+            data_send = 's:' + config.config["server"]["url"] + '\n'
             self.transport.write(data_send.encode())
 
         self.transport.loseConnection()
 
 
 def run(config):
-    global devs
-
-    if config is None:
-        interval = 30
-        devs = devices.Devices()
-    else:
-        interval = config['server']['send_interval']
-        devs = devices.Devices(
-                config['i2c_sensors']['bus'],
-                [
-                    config['i2c_sensors']['light_sensor_addr'],
-                    config['i2c_sensors']['distance_sensor_addr'],
-                    config['i2c_sensors']['battery_sensor_addr']
-                ],
-                config['gps']['port'],
-                config['gps']['rate'],
-                config['gprs']['port'],
-                config['gprs']['rate'],
-                config['gprs']['apn'])
+    devices.init(config)
+    interval = config['server']['send_interval']
     now = time.time()
     old = now - interval
     while not stop:
         now = time.time()
         if now - old >= interval:
-            print(devs.read())
+            print(devices.devices.read())
             old = now
         time.sleep(1)
-
-
-def check_config_integrity(config):
-    """
-    Checks the integrity of the configuration file
-    """
-    if type(config['tcp_port']) is not int:
-        return False
-
-    # Server config
-    if type(config['server']) is not dict:
-        return False
-    if type(config['server']['url']) is not str:
-        return False
-    if type(config['server']['send_interval']) is not int:
-        return False
-
-    # I2C sensors config
-    if type(config['i2c_sensors']) is not dict:
-        return False
-    if type(config['i2c_sensors']['bus']) is not int:
-        return False
-    if type(config['i2c_sensors']['light_sensor_addr']) is not int:
-        return False
-    if type(config['i2c_sensors']['distance_sensor_addr']) is not int:
-        return False
-    if type(config['i2c_sensors']['battery_sensor_addr']) is not int:
-        return False
-
-    # GPS config
-    if type(config['gps']) is not dict:
-        return False
-    if type(config['gps']['port']) is not str:
-        return False
-    if type(config['gps']['rate']) is not int:
-        return False
-
-    # GPRS config
-    if type(config['gprs']) is not dict:
-        return False
-    if type(config['gprs']['port']) is not str:
-        return False
-    if type(config['gprs']['rate']) is not int:
-        return False
-    if type(config['gprs']['apn']) is not str:
-        return False
-
-    return True
 
 
 def main(argv):
@@ -141,24 +75,16 @@ def main(argv):
         elif opt in ('-c', '--config_file'):
             config_file = arg
 
-    global config
-    tcp_port = 1234
-    try:
-        with open(config_file, 'r') as f:
-            config = json.load(f)
-        if not check_config_integrity(config):
-            print('Error in config file. Using default params.')
-        tcp_port = config['tcp_port']
-    except:
+    if not config.read_file(config_file):
         print('Error in read config file. Using default params.')
 
-    thread = threading.Thread(target=run, args=(config,))
+    thread = threading.Thread(target=run, args=(config.config,))
     thread.start()
     signal.signal(signal.SIGINT, lambda *a: reactor.stop())
 
     factory = protocol.ServerFactory()
     factory.protocol = TcpServer
-    reactor.listenTCP(tcp_port, factory)
+    reactor.listenTCP(config.config['tcp_port'], factory)
     reactor.run()
     print('stopping...')
     global stop
