@@ -12,8 +12,8 @@ LIGHT_SENSOR_VALUE_LIST = list(range(0, 101))
 # 0cm to 255cm
 DISTANCE_SENSOR_VALUE_LIST = list(range(0, 256))
 
-# 90dV to 120dV (9V to 12V  - values in decivolts)
-BATTERY_SENSOR_VALUE_LIST = list(range(90, 121))
+# 120dV to 90dV (12V to 9V  - values in decivolts)
+BATTERY_SENSOR_VALUE_LIST = list(range(120, 90, -1))
 
 def main():
     i2c_bus = fake_i2c.FakeI2cBus(100, [0x10, 0x26, 0x61])
